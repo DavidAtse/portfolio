@@ -1,0 +1,282 @@
+/* ══════════════════════════════════════════════════
+   WEB.CSS — Projets Web
+   Style : Tech / Code / Circuit
+   Accent : Cyan #00d4ff
+   ══════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Space+Mono:wght@400;700&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --cyan:        #00d4ff;
+  --cyan-dim:    rgba(0, 212, 255, 0.10);
+  --cyan-border: rgba(0, 212, 255, 0.22);
+  --dark:        #080c0e;
+  --dark2:       #0d1316;
+  --dark3:       #141b1f;
+  --dark4:       #1c2428;
+  --white:       #e8f0f4;
+  --muted:       #4e6470;
+  --muted2:      #7a96a4;
+  --font-display:'Bebas Neue', sans-serif;
+  --font-body:   'DM Sans', sans-serif;
+  --font-mono:   'Space Mono', monospace;
+}
+
+body {
+  background: var(--dark);
+  background-image:
+    linear-gradient(rgba(0,212,255,0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.028) 1px, transparent 1px);
+  background-size: 52px 52px;
+  color: var(--white);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── CONTAINER ─────────────────────────────────── */
+.web-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 7rem 2.5rem 6rem;
+}
+
+/* ── TITRE ─────────────────────────────────────── */
+.web-container > h1 {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 7vw, 6rem);
+  letter-spacing: 0.05em;
+  line-height: 0.92;
+  display: inline-block;
+  position: relative;
+  margin-bottom: 3.5rem;
+}
+
+.web-container > h1::before {
+  content: '— Projets';
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 400;
+  color: var(--cyan);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  margin-bottom: 0.7rem;
+}
+
+.web-container > h1::after {
+  content: '';
+  display: block;
+  width: 54px;
+  height: 3px;
+  background: var(--cyan);
+  margin-top: 0.75rem;
+  border-radius: 2px;
+}
+
+/* ── GRILLE ────────────────────────────────────── */
+.web-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.4rem;
+}
+
+/* ── CARTE ─────────────────────────────────────── */
+.web-card {
+  background: var(--dark3);
+  border: 1px solid rgba(0, 212, 255, 0.09);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.35s ease, transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94);
+  opacity: 0;
+  animation: cardIn 0.6s ease forwards;
+}
+
+.web-card:nth-child(1)  { animation-delay: 0.05s; }
+.web-card:nth-child(2)  { animation-delay: 0.12s; }
+.web-card:nth-child(3)  { animation-delay: 0.19s; }
+.web-card:nth-child(4)  { animation-delay: 0.26s; }
+.web-card:nth-child(5)  { animation-delay: 0.33s; }
+.web-card:nth-child(6)  { animation-delay: 0.40s; }
+.web-card:nth-child(n+7){ animation-delay: 0.47s; }
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Coin décoratif en haut à droite */
+.web-card::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 52px; height: 52px;
+  border-left: 1px solid rgba(0,212,255,0.13);
+  border-bottom: 1px solid rgba(0,212,255,0.13);
+  border-bottom-left-radius: 8px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Glow au hover */
+.web-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% -10%, rgba(0,212,255,0.07) 0%, transparent 65%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+
+.web-card:hover {
+  border-color: rgba(0, 212, 255, 0.42);
+  transform: translateY(-4px);
+}
+.web-card:hover::after { opacity: 1; }
+
+/* Barre cyan gauche au hover */
+.web-card .bar-left {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--cyan);
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 2;
+  border-radius: 10px 0 0 10px;
+}
+.web-card:hover .bar-left { opacity: 1; }
+
+/* ── IMAGE ─────────────────────────────────────── */
+.web-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--dark2);
+  position: relative;
+}
+
+.web-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.55s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.35s;
+  opacity: 0.88;
+}
+
+.web-card:hover .web-image img {
+  transform: scale(1.04);
+  opacity: 1;
+}
+
+/* Overlay coloré sur l'image au hover */
+.web-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 212, 255, 0.08);
+  opacity: 0;
+  transition: opacity 0.35s;
+}
+.web-card:hover .web-image::after { opacity: 1; }
+
+/* ── CORPS CARTE ───────────────────────────────── */
+.web-card-body {
+  padding: 1.4rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0;
+}
+
+/* Numéro de projet */
+.web-card .card-num {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: rgba(0,212,255,0.42);
+  letter-spacing: 0.18em;
+  margin-bottom: 0.7rem;
+  display: block;
+}
+
+.web-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  margin-bottom: 0.6rem;
+  color: var(--white);
+  padding: 0 1.5rem;
+  padding-top: 1.2rem;
+}
+
+.web-card p {
+  font-size: 0.84rem;
+  color: var(--muted2);
+  font-weight: 300;
+  line-height: 1.65;
+  margin-bottom: 1.4rem;
+  padding: 0 1.5rem;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+/* ── LIEN ──────────────────────────────────────── */
+.web-card a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--white);
+  text-decoration: none;
+  padding: 0.65rem 1.2rem;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 4px;
+  transition: color 0.25s, border-color 0.25s, background 0.25s;
+  align-self: flex-start;
+  margin: 0 1.5rem 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.web-card a::after {
+  content: '→';
+  font-size: 0.75rem;
+  transition: transform 0.22s;
+}
+
+.web-card a:hover {
+  color: var(--cyan);
+  border-color: var(--cyan-border);
+  background: var(--cyan-dim);
+}
+
+.web-card a:hover::after {
+  transform: translateX(3px);
+}
+
+/* Séparateur entre image et texte */
+.web-card .divider {
+  height: 1px;
+  background: rgba(0,212,255,0.07);
+  margin: 0;
+}
+
+/* ── RESPONSIVE ────────────────────────────────── */
+@media (max-width: 768px) {
+  .web-container { padding: 5.5rem 1.2rem 3rem; }
+  .web-grid { grid-template-columns: 1fr; }
+  .web-container > h1 { font-size: 2.5rem; }
+}
