@@ -1,0 +1,40 @@
+# Operating system files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# PHPStorm / IntelliJ
+.idea/
+*.iml
+
+# Node modules
+node_modules/
+
+# Composer vendor
+vendor/
+
+# Logs and runtime files
+*.log
+logs/
+phpunit.xml
+phpunit.xml.dist
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Backup and temp files
+*.bak
+*.tmp
+*.swp
+*.swo
+*~
+
+# Windows thumbnail cache
+Thumbs.db
+
+# Uploads or build artifacts (untracked if not already committed)
+# Uncomment if you want to ignore uploaded files
+# uploads/
