@@ -144,7 +144,7 @@
                 <h2 class="section-title">Mon <span>CV</span> & Contact</h2>
                 <p>Tu veux en savoir plus sur mon parcours ou collaborer sur un projet ? Télécharge mon CV ou envoie-moi un message directement.</p>
                 <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                    <a href="../portfolio/assets/files/CV-David-Atse ORIGINAL pdf.pdf (1).pdf" download class="btn-primary">↓ Télécharger CV</a>
+                    <a href="assets/files/CV David Atse.pdf" download class="btn-primary">↓ Télécharger CV</a>
                     <a href="mailto:daatsey24@gmail.com" class="btn-outline">Me contacter</a>
                 </div>
             </div>
