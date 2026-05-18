@@ -96,6 +96,25 @@
                         Montage créatif, motion design et storytelling vidéo. Des contenus qui captivent et engagent ton audience dès la première seconde.
                     </p>
                 </a>
+
+                <a href="pages/certificats.php" class="service-card" id="projets-video">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <!-- Contour du diplôme / document -->
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <!-- Ligne de pliure du coin supérieur droit -->
+                            <polyline points="14 2 14 8 20 8" />
+                            <!-- Lignes de texte simulées -->
+                            <line x1="16" y1="13" x2="8" y2="13" />
+                            <line x1="16" y1="17" x2="8" y2="17" />
+                            <line x1="10" y1="9" x2="8" y2="9" />
+                        </svg>
+                    </div>
+                    <h3 class="service-name">Certficats</h3>
+                    <p class="service-desc">
+                        Certifications officielles, accréditations et reconnaissance de compétences. Des preuves tangibles de mon expertise et de mon engagement envers l'excellence dans le domaine du développement web et du design digital.
+                    </p>
+                </a>
         
             </div>
         </section>

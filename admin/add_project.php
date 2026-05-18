@@ -91,6 +91,7 @@
                             <option value="web">Site Web</option>
                             <option value="photo">Photoshop</option>
                             <option value="video">Vidéo</option>
+                            <option value="certificat">Certificat</option>
                         </select>
                     </div>
 
