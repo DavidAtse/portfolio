@@ -11,6 +11,7 @@
     $web     = count(array_filter($projects, fn($p) => $p['category'] === 'web'));
     $photo   = count(array_filter($projects, fn($p) => $p['category'] === 'photo'));
     $video   = count(array_filter($projects, fn($p) => $p['category'] === 'video'));
+    $certificats = count(array_filter($projects, fn($p) => $p['category'] === 'certificat'));
 ?>
 
 <!DOCTYPE html>
@@ -68,6 +69,10 @@
                 <div class="stat-card amber">
                     <p class="stat-label">Photoshop</p>
                     <p class="stat-num"><?= $photo ?><span class="accent">.</span></p>
+                </div>
+                <div class="stat-card amber">
+                    <p class="stat-label">Certificats</p>
+                    <p class="stat-num"><?= $certificats ?><span class="accent">.</span></p>
                 </div>
             </div>
 
