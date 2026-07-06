@@ -1,42 +1,96 @@
 <?php
-    session_start();
-    require_once("../config/db.php");
-    if (!isset($_SESSION['admin'])) {
-        header("Location: login.php");
-        exit();
-    }
+session_start();
+require_once("../config/db.php");
+require_once("../includes/csrf.php");
 
-    $message = "";
-    $msgType = "";
+if (!isset($_SESSION['admin'])) {
+    header("Location: login.php");
+    exit();
+}
 
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $title       = $_POST['title'];
-        $description = $_POST['description'];
-        $category    = $_POST['category'];
-        $link        = $_POST['link'];
+// ── Allowed file types ────────────────────────────────────────────────────
+const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'webm', 'mov', 'pdf'];
+const ALLOWED_MIMES      = [
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+    'video/mp4', 'video/webm', 'video/quicktime',
+    'application/pdf'
+];
+const MAX_FILE_SIZE      = 100 * 1024 * 1024; // 100 MB
 
-        $imageName = $_FILES['image']['name'];
-        $tmpName   = $_FILES['image']['tmp_name'];
-        $uploadDir = "../uploads/";
-        $newName   = time() . "_" . $imageName;
+$message = "";
+$msgType = "";
 
-        if (move_uploaded_file($tmpName, $uploadDir . $newName)) {
-            $stmt = $pdo->prepare("INSERT INTO projects (title, description, image, category, link) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$title, $description, $newName, $category, $link]);
-            $message = "Projet ajouté avec succès !";
-            $msgType = "success";
-        } else {
-            $message = "Erreur lors de l'upload de l'image.";
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    if (!csrf_verify()) {
+        $message = "Requête invalide. Veuillez réessayer.";
+        $msgType = "error";
+    } else {
+        csrf_rotate();
+
+        $title       = trim($_POST['title'] ?? '');
+        $description = trim($_POST['description'] ?? '');
+        $category    = $_POST['category'] ?? '';
+        $link        = trim($_POST['link'] ?? '');
+
+        // Validate required fields
+        if (empty($title) || empty($category)) {
+            $message = "Le titre et la catégorie sont obligatoires.";
             $msgType = "error";
+        } elseif (!in_array($category, ['web', 'photo', 'video', 'certificat'], true)) {
+            $message = "Catégorie invalide.";
+            $msgType = "error";
+        } elseif (empty($_FILES['image']['name'])) {
+            $message = "Veuillez choisir un fichier.";
+            $msgType = "error";
+        } else {
+            $file     = $_FILES['image'];
+            $origName = basename($file['name']);
+            $tmpPath  = $file['tmp_name'];
+            $fileSize = $file['size'];
+            $ext      = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
+
+            // Validate extension
+            if (!in_array($ext, ALLOWED_EXTENSIONS, true)) {
+                $message = "Extension de fichier non autorisée. Autorisé : " . implode(', ', ALLOWED_EXTENSIONS);
+                $msgType = "error";
+            }
+            // Validate MIME type
+            elseif (!in_array(mime_content_type($tmpPath), ALLOWED_MIMES, true)) {
+                $message = "Type de fichier non autorisé.";
+                $msgType = "error";
+            }
+            // Validate size
+            elseif ($fileSize > MAX_FILE_SIZE) {
+                $message = "Fichier trop lourd (max 100 MB).";
+                $msgType = "error";
+            } else {
+                // Safe filename: timestamp + random + sanitized extension
+                $newName  = time() . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
+                $uploadDir = "../uploads/";
+
+                if (move_uploaded_file($tmpPath, $uploadDir . $newName)) {
+                    $stmt = $pdo->prepare(
+                        "INSERT INTO projects (title, description, image, category, link) VALUES (?, ?, ?, ?, ?)"
+                    );
+                    $stmt->execute([$title, $description, $newName, $category, $link ?: null]);
+                    $message = "Projet ajouté avec succès !";
+                    $msgType = "success";
+                } else {
+                    $message = "Erreur lors de l'upload du fichier.";
+                    $msgType = "error";
+                }
+            }
         }
     }
+}
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajouter un projet</title>
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
     <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
 <body>
@@ -44,8 +98,8 @@
     <div class="admin-layout">
 
         <!-- SIDEBAR -->
-        <aside class="admin-sidebar">
-            <div class="sidebar-logo">GG<span>.</span></div>
+        <aside class="admin-sidebar" id="sidebar">
+            <div class="sidebar-logo">D<span>.</span>A</div>
             <span class="sidebar-label">Navigation</span>
             <ul class="sidebar-nav">
                 <li><a href="index.php"><span class="nav-icon">▦</span> Dashboard</a></li>
@@ -55,6 +109,11 @@
                 <a href="logout.php"><span>⏻</span> Déconnexion</a>
             </div>
         </aside>
+
+        <!-- HAMBURGER -->
+        <button class="hamburger" id="hamburger" aria-label="Menu" onclick="toggleSidebar()">
+            <span></span><span></span><span></span>
+        </button>
 
         <!-- MAIN -->
         <main class="admin-main">
@@ -69,19 +128,20 @@
             <div class="add-layout">
 
                 <?php if ($message): ?>
-                    <div class="msg-<?= $msgType ?>"><?= $message ?></div>
+                    <div class="msg-<?= htmlspecialchars($msgType) ?>"><?= htmlspecialchars($message) ?></div>
                 <?php endif; ?>
 
                 <form class="add-form" method="POST" enctype="multipart/form-data">
+                    <?= csrf_field() ?>
 
                     <div class="form-field">
                         <label for="title">Titre du projet</label>
-                        <input type="text" id="title" name="title" placeholder="Ex: Journal de Babi" required>
+                        <input type="text" id="title" name="title" placeholder="Ex: Journal de Babi" required maxlength="255">
                     </div>
 
                     <div class="form-field">
                         <label for="description">Description</label>
-                        <textarea id="description" name="description" placeholder="Décris ton projet en quelques lignes..."></textarea>
+                        <textarea id="description" name="description" placeholder="Décris ton projet en quelques lignes..." maxlength="2000"></textarea>
                     </div>
 
                     <div class="form-field">
@@ -97,19 +157,20 @@
 
                     <div class="form-field">
                         <label for="link">Lien du projet (optionnel)</label>
-                        <input type="text" id="link" name="link" placeholder="https://...">
+                        <input type="url" id="link" name="link" placeholder="https://...">
                     </div>
 
                     <div class="form-field">
-                        <label>Image / Fichier</label>
+                        <label>Image / Vidéo / PDF</label>
                         <div class="file-upload-wrap">
-                            <input type="file" id="image" name="image" required>
+                            <input type="file" id="image" name="image" required
+                                accept=".jpg,.jpeg,.png,.gif,.webp,.mp4,.webm,.mov,.pdf">
                             <label for="image" class="file-upload-label">
-                            <div class="file-upload-icon">📁</div>
-                            <div class="file-upload-text">
-                                <strong>Choisir un fichier</strong>
-                                <span>JPG, PNG, MP4 — max 10MB</span>
-                            </div>
+                                <div class="file-upload-icon">📁</div>
+                                <div class="file-upload-text">
+                                    <strong>Choisir un fichier</strong>
+                                    <span>JPG, PNG, GIF, WEBP, MP4, WEBM, MOV, PDF — max 100 MB</span>
+                                </div>
                             </label>
                             <p class="file-name-display" id="file-name"></p>
                         </div>
@@ -129,6 +190,10 @@
         const name = this.files[0] ? this.files[0].name : '';
         document.getElementById('file-name').textContent = name ? '✓ ' + name : '';
     });
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('hamburger').classList.toggle('active');
+    }
     </script>
 
 </body>
