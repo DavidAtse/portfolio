@@ -3,12 +3,23 @@
 $isLocal = in_array($_SERVER['SERVER_NAME'] ?? '', ['localhost', '127.0.0.1', '::1'])
         || str_starts_with($_SERVER['SERVER_NAME'] ?? '', '192.168.');
 
+// 👉 OPTION MANUELLE pour le nouvel hébergeur
+$useNovaHost = false; // <-- mets true quand tu déploies sur ce nouvel hébergeur
+
 if ($isLocal) {
     // ── LOCAL (XAMPP) ──────────────────────────────────────────────────────
     $host   = "localhost";
     $dbname = "portfolio_db";
     $dbuser = "root";
     $dbpass = "";
+
+} elseif ($useNovaHost) {
+    // ── NOUVEL HÉBERGEUR (Nova / Voisilab) ────────────────────────────────
+    $host   = "voisilab-data-mysql";
+    $dbname = "db_portfolio_nova_063b8c";
+    $dbuser = "u_portfolio_nova_063b8c";
+    $dbpass = "BfnfW0gfSxvHSIvTMh3fiC-O";
+
 } else {
     // ── PRODUCTION (InfinityFree) ──────────────────────────────────────────
     $host   = "sql104.infinityfree.com";
