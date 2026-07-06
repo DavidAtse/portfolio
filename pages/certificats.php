@@ -1,22 +1,19 @@
 <?php
 require_once("../config/db.php");
 
-$stmt = $pdo->query("SELECT * FROM projects ORDER BY id DESC");
-$projects = $stmt->fetchAll();
+$stmt = $pdo->prepare("SELECT * FROM projects WHERE category = 'certificat' ORDER BY id DESC");
+$stmt->execute();
+$certificats = $stmt->fetchAll();
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Certificats - Atse David</title>
-
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
     <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="stylesheet" href="../assets/css/photoshop.css">
     <link rel="stylesheet" href="../assets/css/certificat.css">
-
-
 </head>
 <body>
 
@@ -29,58 +26,36 @@ $projects = $stmt->fetchAll();
         Mes <span>Certificats</span>
     </h1>
 
+    <?php if (empty($certificats)): ?>
+        <p class="empty-message">Aucun certificat disponible pour le moment.</p>
+    <?php else: ?>
     <div class="certificates-grid">
-
-        <?php
-        $hasCertificates = false;
-
-        foreach ($projects as $project):
-            if ($project['category'] === 'certificat'):
-
-                $hasCertificates = true;
-        ?>
-
+        <?php foreach ($certificats as $c): ?>
             <div class="certificate-card">
 
                 <div class="pdf-icon">📄</div>
 
-                <h3>
-                    <?= htmlspecialchars($project['title']) ?>
-                </h3>
+                <h3><?= htmlspecialchars($c['title']) ?></h3>
 
-                <p>
-                    <?= htmlspecialchars($project['description']) ?>
-                </p>
+                <?php if (!empty($c['description'])): ?>
+                    <p><?= htmlspecialchars($c['description']) ?></p>
+                <?php endif; ?>
 
-                <a
-                    href="../uploads/<?= htmlspecialchars($project['image']) ?>"
-                    target="_blank"
-                    class="certificate-btn"
-                >
+                <a href="../uploads/<?= htmlspecialchars($c['image']) ?>"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="certificate-btn">
                     Voir le certificat
                 </a>
 
             </div>
-
-        <?php
-            endif;
-        endforeach;
-        ?>
-
+        <?php endforeach; ?>
     </div>
-
-    <?php if (!$hasCertificates): ?>
-
-        <p class="empty-message">
-            Aucun certificat disponible pour le moment.
-        </p>
-
     <?php endif; ?>
 
 </section>
 
 <?php include("../includes/footer.php"); ?>
-
 <script src="../assets/js/script.js"></script>
 
 </body>

@@ -1,0 +1,23 @@
+# ── Security Headers ────────────────────────────────────────────────────────
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>
+
+# ── Protect config files ──────────────────────────────────────────────────
+<FilesMatch "\.(env|sql|md|log|git)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# ── Prevent directory listing ──────────────────────────────────────────────
+Options -Indexes
+
+# ── Block direct access to PHP includes ───────────────────────────────────
+<FilesMatch "^(db|admin|csrf)\.php$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

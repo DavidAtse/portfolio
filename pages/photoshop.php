@@ -1,16 +1,17 @@
 <?php
 require_once("../config/db.php");
 
-$stmt = $pdo->query("SELECT * FROM projects ORDER BY id DESC");
-$projects = $stmt->fetchAll();
+$stmt = $pdo->prepare("SELECT * FROM projects WHERE category = 'photo' ORDER BY id DESC");
+$stmt->execute();
+$photos = $stmt->fetchAll();
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Photoshop - Atse David</title>
-
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="../assets/css/photoshop.css">
 </head>
@@ -22,35 +23,37 @@ $projects = $stmt->fetchAll();
 <div class="gallery-container">
     <h1>Mes créations Photoshop</h1>
 
-    <div class="filter-bar">
-        <button onclick="filterPhotos('all')">Tous</button>
-        <button onclick="filterPhotos('photo')">Photoshop</button>
-    </div>
-
+    <?php if (empty($photos)): ?>
+        <p class="empty-msg">Aucune création disponible pour le moment.</p>
+    <?php else: ?>
     <div class="gallery">
+        <?php foreach ($photos as $p): ?>
+            <div class="photo-card"
+                 onclick="openLightbox('../uploads/<?= htmlspecialchars($p['image'], ENT_QUOTES) ?>')"
+                 role="button" tabindex="0"
+                 aria-label="<?= htmlspecialchars($p['title']) ?>">
 
-        <?php foreach ($projects as $project): ?>
-            <?php if ($project['category'] === 'photo'): ?>
+                <img src="../uploads/<?= htmlspecialchars($p['image']) ?>"
+                     alt="<?= htmlspecialchars($p['title']) ?>"
+                     loading="lazy">
 
-                <div class="photo-card" onclick="openLightbox('../uploads/<?= $project['image'] ?>')">
-
-                    <img src="../uploads/<?= $project['image'] ?>" alt="">
-
-                    <div class="overlay">
-                        <h3><?= $project['title'] ?></h3>
-                    </div>
-
+                <div class="overlay">
+                    <h3><?= htmlspecialchars($p['title']) ?></h3>
+                    <?php if (!empty($p['description'])): ?>
+                        <p><?= htmlspecialchars($p['description']) ?></p>
+                    <?php endif; ?>
                 </div>
 
-            <?php endif; ?>
+            </div>
         <?php endforeach; ?>
-
     </div>
 
     <!-- LIGHTBOX -->
-    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
-        <img id="lightbox-img">
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()" role="dialog" aria-modal="true">
+        <button class="lightbox-close" onclick="closeLightbox()" aria-label="Fermer">✕</button>
+        <img id="lightbox-img" alt="">
     </div>
+    <?php endif; ?>
 </div>
 
 <?php include("../includes/footer.php"); ?>

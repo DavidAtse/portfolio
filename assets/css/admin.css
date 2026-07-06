@@ -760,10 +760,117 @@ body.login-page {
 }
 .btn-back:hover { color: var(--white); border-color: rgba(255,255,255,0.2); }
 
-/* ── RESPONSIVE ─────────────────────────── */
+/* ── CARD THUMB (video preview in dashboard) ─── */
+.card-thumb {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  display: block;
+  filter: brightness(0.85);
+  transition: filter 0.3s;
+}
+.project-card:hover .card-thumb { filter: brightness(1); }
+
+/* ── BUTTON DELETE ───────────────────────────── */
+.btn-delete {
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.45rem 0;
+  border-radius: 4px;
+  text-decoration: none;
+  cursor: pointer;
+  background: var(--red-dim);
+  color: var(--red);
+  border: 1px solid rgba(255,45,85,0.22);
+  transition: background 0.2s;
+  width: 100%;
+}
+.btn-delete:hover { background: rgba(255,45,85,0.2); }
+.project-card .btns form { width: 100%; }
+
+/* ── HAMBURGER BUTTON ────────────────────────── */
+.hamburger {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 200;
+  background: var(--dark3);
+  border: 1px solid rgba(0,230,118,0.15);
+  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  padding: 0;
+}
+.hamburger span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--white);
+  border-radius: 2px;
+  transition: transform 0.3s, opacity 0.3s;
+}
+.hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.active span:nth-child(2) { opacity: 0; }
+.hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ── OVERLAY MOBILE ──────────────────────────── */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 9;
+}
+.sidebar-overlay.show { display: block; }
+
+/* ── RESPONSIVE TABLET (768px – 1024px) ─────── */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .admin-sidebar { width: 180px; }
+  .admin-main { margin-left: 180px; padding: 2rem 1.5rem; }
+  .projects-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+  .stats-row { grid-template-columns: repeat(3, 1fr); }
+  .admin-topbar { flex-wrap: wrap; gap: 1rem; }
+}
+
+/* ── RESPONSIVE MOBILE (≤ 768px) ────────────── */
 @media (max-width: 768px) {
-  .admin-sidebar { display: none; }
-  .admin-main { margin-left: 0; padding: 1.5rem; }
-  .projects-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
-  .add-layout { padding: 1.5rem; }
+  .hamburger { display: flex; }
+
+  .admin-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 100;
+  }
+  .admin-sidebar.open { transform: translateX(0); }
+
+  .admin-main {
+    margin-left: 0;
+    padding: 5rem 1.2rem 3rem;
+  }
+
+  .admin-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding-top: 0.5rem;
+  }
+  .topbar-actions { flex-wrap: wrap; gap: 0.5rem; }
+
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .projects-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .add-layout { padding: 0; }
+  .form-actions { flex-direction: column; }
+  .btn-save, .btn-back { width: 100%; text-align: center; }
+
+  .login-card { padding: 2rem 1.4rem; }
 }
