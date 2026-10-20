@@ -1,19 +1,16 @@
 <?php
-session_start();
-
-require_once("../config/admin.php");
 require_once("../includes/csrf.php");
+secure_session_start();
+require_once("../config/admin.php");
 
-// ── Rate limiting ──────────────────────────────────────────────────────────
-const MAX_ATTEMPTS   = 5;
-const LOCKOUT_SECS   = 900; // 15 min
+// ── Rate limiting (IP + Session) ───────────────────────────────────────────
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_SECS = 900; // 15 min
 
-if (!isset($_SESSION['login_attempts']))  $_SESSION['login_attempts']  = 0;
-if (!isset($_SESSION['lockout_until']))   $_SESSION['lockout_until']   = 0;
-
-$isLocked     = time() < $_SESSION['lockout_until'];
-$remaining    = max(0, ceil(($_SESSION['lockout_until'] - time()) / 60));
-$error        = "";
+$rl        = rate_limit_status(MAX_ATTEMPTS, LOCKOUT_SECS);
+$isLocked  = $rl['isLocked'];
+$remaining = $rl['remaining'];
+$error     = "";
 
 // ── Handle POST ─────────────────────────────────────────────────────────────
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -23,24 +20,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $error = "Requête invalide. Veuillez réessayer.";
         csrf_rotate();
     } else {
-        $username = trim($_POST['username'] ?? '');
-        $password = $_POST['password'] ?? '';
+        $username   = trim($_POST['username'] ?? '');
+        $password   = $_POST['password'] ?? '';
+        $targetHash = ADMIN_PASS_HASH ?: '$2y$12$00000000000000000000000000000000000000000000000000000';
 
-        if ($username === ADMIN_USER && password_verify($password, ADMIN_PASS_HASH)) {
-            $_SESSION['login_attempts'] = 0;
-            $_SESSION['lockout_until']  = 0;
-            $_SESSION['admin']          = true;
+        $validUser = ADMIN_USER !== '' && hash_equals(ADMIN_USER, $username);
+        $validPass = password_verify($password, $targetHash);
+
+        if ($validUser && $validPass) {
+            rate_limit_clear();
             session_regenerate_id(true);
+            $_SESSION['admin']          = true;
+            $_SESSION['_ua']            = hash('sha256', $_SERVER['HTTP_USER_AGENT'] ?? 'unknown');
+            $_SESSION['_last_activity'] = time();
             csrf_rotate();
             header("Location: index.php");
             exit();
         } else {
-            $_SESSION['login_attempts']++;
-            if ($_SESSION['login_attempts'] >= MAX_ATTEMPTS) {
-                $_SESSION['lockout_until'] = time() + LOCKOUT_SECS;
+            $rl        = rate_limit_record_failure(MAX_ATTEMPTS, LOCKOUT_SECS);
+            $isLocked  = $rl['isLocked'];
+            $remaining = $rl['remaining'];
+            if ($isLocked) {
                 $error = "Trop de tentatives. Compte bloqué 15 minutes.";
             } else {
-                $left  = MAX_ATTEMPTS - $_SESSION['login_attempts'];
+                $left  = max(0, MAX_ATTEMPTS - $rl['attempts']);
                 $error = "Identifiants incorrects. ({$left} essai" . ($left > 1 ? 's' : '') . " restant" . ($left > 1 ? 's' : '') . ")";
             }
         }

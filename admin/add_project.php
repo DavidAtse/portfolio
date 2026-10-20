@@ -1,7 +1,7 @@
 <?php
-session_start();
-require_once("../config/db.php");
 require_once("../includes/csrf.php");
+secure_session_start();
+require_once("../config/db.php");
 
 if (!isset($_SESSION['admin'])) {
     header("Location: login.php");
@@ -32,6 +32,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $category    = $_POST['category'] ?? '';
         $link        = trim($_POST['link'] ?? '');
 
+        $isValidLink = true;
+        if ($link !== '') {
+            $scheme      = strtolower((string)parse_url($link, PHP_URL_SCHEME));
+            $isValidLink = filter_var($link, FILTER_VALIDATE_URL) !== false && in_array($scheme, ['http', 'https'], true);
+        }
+
         // Validate required fields
         if (empty($title) || empty($category)) {
             $message = "Le titre et la catégorie sont obligatoires.";
@@ -39,36 +45,49 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } elseif (!in_array($category, ['web', 'photo', 'video', 'certificat'], true)) {
             $message = "Catégorie invalide.";
             $msgType = "error";
-        } elseif (empty($_FILES['image']['name'])) {
-            $message = "Veuillez choisir un fichier.";
+        } elseif (!$isValidLink) {
+            $message = "Le lien doit être une URL valide commençant par http:// ou https://.";
+            $msgType = "error";
+        } elseif (empty($_FILES['image']['name']) || ($_FILES['image']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            $message = "Veuillez choisir un fichier valide.";
             $msgType = "error";
         } else {
             $file     = $_FILES['image'];
             $origName = basename($file['name']);
             $tmpPath  = $file['tmp_name'];
-            $fileSize = $file['size'];
+            $fileSize = (int)$file['size'];
             $ext      = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
+
+            $finfo    = new finfo(FILEINFO_MIME_TYPE);
+            $realMime = is_uploaded_file($tmpPath) ? $finfo->file($tmpPath) : '';
+            $isImgExt = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true);
 
             // Validate extension
             if (!in_array($ext, ALLOWED_EXTENSIONS, true)) {
                 $message = "Extension de fichier non autorisée. Autorisé : " . implode(', ', ALLOWED_EXTENSIONS);
                 $msgType = "error";
             }
-            // Validate MIME type
-            elseif (!in_array(mime_content_type($tmpPath), ALLOWED_MIMES, true)) {
+            // Validate real MIME type via finfo
+            elseif (!in_array($realMime, ALLOWED_MIMES, true)) {
                 $message = "Type de fichier non autorisé.";
                 $msgType = "error";
             }
+            // Validate real image header if extension is an image
+            elseif ($isImgExt && @getimagesize($tmpPath) === false) {
+                $message = "Le fichier image est invalide ou corrompu.";
+                $msgType = "error";
+            }
             // Validate size
-            elseif ($fileSize > MAX_FILE_SIZE) {
+            elseif ($fileSize <= 0 || $fileSize > MAX_FILE_SIZE) {
                 $message = "Fichier trop lourd (max 100 MB).";
                 $msgType = "error";
             } else {
                 // Safe filename: timestamp + random + sanitized extension
-                $newName  = time() . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
+                $newName   = time() . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
                 $uploadDir = "../uploads/";
 
                 if (move_uploaded_file($tmpPath, $uploadDir . $newName)) {
+                    @chmod($uploadDir . $newName, 0644);
                     $stmt = $pdo->prepare(
                         "INSERT INTO projects (title, description, image, category, link) VALUES (?, ?, ?, ?, ?)"
                     );

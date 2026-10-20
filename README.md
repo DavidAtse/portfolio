@@ -139,35 +139,26 @@ cd portfolio
 3. Crée une nouvelle base de données nommée `portfolio_db`.
 4. Rends-toi dans l'onglet **Importer**, sélectionne le fichier `portfolio_db.sql` situé à la racine du projet, puis valide.
 
-### 3. Vérifier la configuration
-Le fichier `config/db.php` détecte automatiquement l'environnement local (`localhost` ou `127.0.0.1`) et applique les paramètres par défaut de XAMPP :
-```php
-$host   = "localhost";
-$dbname = "portfolio_db";
-$dbuser = "root";
-$dbpass = "";
+### 3. Configurer les variables d'environnement (`.env`)
+Copie le fichier d'exemple `.env.example` vers `.env` (ce fichier est ignoré par Git pour ne jamais exposer de mots de passe) :
+```bash
+cp .env.example .env
 ```
+Génère ton propre hash de mot de passe administrateur avec PHP :
+```bash
+php -r "echo password_hash('VotreMotDePasseSecurise', PASSWORD_BCRYPT, ['cost' => 12]);"
+```
+Puis renseigne tes identifiants dans ton fichier `.env`.
 
 ### 4. Accéder à l'application
 - **Site public :** `http://localhost/portfolio/`
 - **Dashboard Admin :** `http://localhost/portfolio/admin/login.php`
-  - **Identifiant par défaut :** `admin`
-  - **Mot de passe par défaut :** `Admin@Portfolio` *(à modifier impérativement en production dans `config/admin.php`)*
 
 ---
 
 ## 🌐 Déploiement en Production
 
-Le fichier `config/db.php` intègre une détection automatique pour l'hébergement Alwaysdata via `alwaysdata.net` :
-
-```php
-} elseif ($isAlwaysData) {
-    $host   = "mysql-VOTRE_COMPTE.alwaysdata.net";
-    $dbname = "VOTRE_COMPTE_portfolio";
-    $dbuser = "VOTRE_COMPTE";
-    $dbpass = "VOTRE_MOT_DE_PASSE";
-}
-```
+Les identifiants sensibles (base de données, compte administrateur) sont chargés dynamiquement depuis le fichier `.env` non versionné via `config/env.php`.
 
 ### Déploiement rapide avec Alwaysdata
 1. Crée la base de données MySQL et importe `portfolio_db.sql` via le phpMyAdmin Alwaysdata.
@@ -175,6 +166,8 @@ Le fichier `config/db.php` intègre une détection automatique pour l'hébergeme
    ```bash
    cd ~/www/portfolio
    git clone https://github.com/DavidAtse/portfolio.git .
+   cp .env.example .env
+   nano .env # Renseigne tes variables de production
    ```
 3. Assure-toi que les droits du dossier `uploads/` permettent l'écriture :
    ```bash

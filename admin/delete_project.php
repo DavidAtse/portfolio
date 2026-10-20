@@ -1,7 +1,7 @@
 <?php
-session_start();
-require_once("../config/db.php");
 require_once("../includes/csrf.php");
+secure_session_start();
+require_once("../config/db.php");
 
 if (!isset($_SESSION['admin'])) {
     header("Location: login.php");

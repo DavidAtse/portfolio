@@ -1,9 +1,6 @@
 <?php
-// ─── CREDENTIALS ADMIN ─────────────────────────────────────────────────────
-// IMPORTANT : Change the password before deploying to production!
-// To generate a new hash: php -r "echo password_hash('YourPassword', PASSWORD_DEFAULT);"
-// ────────────────────────────────────────────────────────────────────────────
+require_once __DIR__ . '/env.php';
 
-define('ADMIN_USER', 'admin');
-define('ADMIN_PASS_HASH', '$2y$12$REMPLACER_PAR_VOTRE_HASH_BCRYPT_SECURISE');
-// Default password: "Admin@Portfolio" — change it immediately!
+// ─── IDENTIFIANTS ADMIN (Chargés depuis .env non versionné) ─────────────────
+define('ADMIN_USER', env('ADMIN_USER'));
+define('ADMIN_PASS_HASH', env('ADMIN_PASS_HASH'));

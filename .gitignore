@@ -4,14 +4,14 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# PHPStorm / IntelliJ
+# IDEs & Editors
 .idea/
+.vscode/
+.claude/
 *.iml
 
-# Node modules
+# Node / Composer
 node_modules/
-
-# Composer vendor
 vendor/
 
 # Logs and runtime files
@@ -20,10 +20,11 @@ logs/
 phpunit.xml
 phpunit.xml.dist
 
-# Environment files
+# Environment & Secret files (NEVER COMMIT)
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+config/secrets.php
 
 # Backup and temp files
 *.bak
@@ -31,10 +32,3 @@ phpunit.xml.dist
 *.swp
 *.swo
 *~
-
-# Windows thumbnail cache
-Thumbs.db
-
-# Uploads or build artifacts (untracked if not already committed)
-# Uncomment if you want to ignore uploaded files
-# uploads/

@@ -1,11 +1,11 @@
 <?php
-session_start();
+require_once("../includes/csrf.php");
+secure_session_start();
 if (!isset($_SESSION['admin'])) {
     header("Location: login.php");
     exit();
 }
 require_once("../config/db.php");
-require_once("../includes/csrf.php");
 
 $projects    = $pdo->query("SELECT * FROM projects ORDER BY id DESC")->fetchAll();
 $total       = count($projects);
